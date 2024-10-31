@@ -7,6 +7,8 @@ SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 json_url = os.path.join(SITE_ROOT, "data", "pictures.json")
 data: list = json.load(open(json_url))
 
+# Additional required imports, if any
+
 ######################################################################
 # RETURN HEALTH OF THE APP
 ######################################################################
@@ -53,10 +55,13 @@ def create_picture():
         return {"message": "Request must be JSON"}, 400
 
     picture = request.get_json()
+
+    # Check if ID is present and unique
     if "id" not in picture or any(p["id"] == picture["id"] for p in data):
-        # Add a "Message" key for duplicate entries
+        # If duplicate, return 302 with duplicate message
         return {"Message": f"picture with id {picture['id']} already present"}, 302
 
+    # Add new picture to data list
     data.append(picture)
     return jsonify(picture), 201
 
@@ -82,7 +87,6 @@ def delete_picture(id):
     """Delete a picture by ID"""
     picture = next((p for p in data if p["id"] == id), None)
     if not picture:
-        # Return 404 if picture not found
         return {"message": "Picture not found"}, 404
 
     data.remove(picture)
